@@ -7,6 +7,7 @@ import static org.springframework.http.HttpStatus.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.fundoonotes.exception.UserException;
+import com.fundoonotes.model.MyMail;
 import com.fundoonotes.model.User;
 import com.fundoonotes.model.UserResponse;
 import com.fundoonotes.repository.UserRespository;
@@ -35,15 +36,16 @@ public class UserService {
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 	
 	@Autowired
-	private TopicProcessor<User> userRegistration;
+	private TopicProcessor<MyMail> userRegistration;
 	
 	public Mono<String> register(Mono<User> monoUser) {
+		System.out.println("Ser "+Thread.currentThread().getId());
 		monoUser = monoUser.map(user -> {
 			user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 			return user;
 		});
 		return monoUser.flatMap(user -> userRespository.findByEmail(user.getEmail())
-				.flatMap(foundUser -> Mono.<String>error(new UserException(BAD_REQUEST, "User already registered")))
+				.flatMap(foundUser -> Mono.<String>error(new UserException(BAD_REQUEST, "Email already registered")))
 				.switchIfEmpty(userRespository.save(user)
 						/*
 						 * Extra test, just to check exception handling, can be removed(wont affect the
@@ -51,7 +53,11 @@ public class UserService {
 						 */
 						.onErrorResume(e -> Mono.error(new Exception("Cannot save to dB")))  
 						.flatMap(reguser -> {
-							userRegistration.onNext(reguser);
+							MyMail myMail = new MyMail();
+							myMail.setTo(reguser.getEmail());
+							myMail.setSubject("Link to activate");
+							myMail.setText("Click here to activate your account.");
+							userRegistration.onNext(myMail);
 							return Mono.just("Registration Success");
 					}))
 				);
@@ -62,7 +68,7 @@ public class UserService {
 				.flatMap(foundUser -> {
 					if(bCryptPasswordEncoder.matches(user.getPassword(), foundUser.getPassword()))
 						return Mono.just(foundUser);
-					return Mono.error(new UserException(UNAUTHORIZED, "Incorrect password"));
+					return Mono.error(new UserException(UNAUTHORIZED, "Incorrect Password"));
 				})
 				.flatMap(foundUser -> {
 					if(foundUser.isVerified()) {
@@ -70,17 +76,21 @@ public class UserService {
 						ur.setToken(jwToken.createJWT("Admin", foundUser.getEmail(), foundUser.getId()));
 						return Mono.just(ur);
 					}
-					return Mono.error(new UserException(UNAUTHORIZED, "Account not verified"));
+					return Mono.error(new UserException(UNAUTHORIZED, "Please Activate Account First"));
 				})
-				.switchIfEmpty(Mono.error(new UserException(NOT_FOUND, "Incorrect email Id"))));
+				.switchIfEmpty(Mono.error(new UserException(NOT_FOUND, "Invalid Email Id"))));
 	}
 	
 	public Mono<String> forgotPassword(String email){
 		return userRespository.findByEmail(email)
 				.flatMap(user -> {
-					//send mail
+					MyMail myMail = new MyMail();
+					myMail.setTo(user.getEmail());
+					myMail.setSubject("Password reset link");
+					myMail.setText("Click here to change your password.");
+					userRegistration.onNext(myMail);
 					return Mono.just("Mail sent, with password reset link");
-				}).switchIfEmpty(Mono.error(new UserException(NOT_FOUND, "Invalid emailId")));
+				}).switchIfEmpty(Mono.error(new UserException(NOT_FOUND, "Incorrect email id")));
 	}
 	
 	public Mono<String> changePassword(String token, String password){

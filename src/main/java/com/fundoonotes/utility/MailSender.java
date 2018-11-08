@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
-import com.fundoonotes.model.User;
+import com.fundoonotes.model.MyMail;
 
 import reactor.core.publisher.TopicProcessor;
 import reactor.util.Logger;
@@ -17,10 +17,12 @@ public class MailSender {
 	
 	Logger logger = Loggers.getLogger(MailSender.class);
 	
-	public MailSender(TopicProcessor<User> userRegistration) {
-		userRegistration.subscribe(user1 -> {
+	public MailSender(TopicProcessor<MyMail> userRegistration) {
+		userRegistration.subscribe(myMail -> {
+			System.out.println("TP "+Thread.currentThread().getId());
+			System.out.println(myMail);
 			try {
-				sendMail(user1.getEmail(), "link to activate", "click on the link below");				
+				sendMail(myMail.getTo(), myMail.getSubject(), myMail.getText());				
 			} catch (Exception e) {
 				logger.error("Mail not sent");
 			}
@@ -28,7 +30,7 @@ public class MailSender {
 	}
 	
 	public void sendMail(String to, String subject, String text) {
-		System.out.println(Thread.currentThread());
+		System.out.println("SM "+Thread.currentThread().getId());
 		SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
 		simpleMailMessage.setTo(to);
 		simpleMailMessage.setSubject(subject);

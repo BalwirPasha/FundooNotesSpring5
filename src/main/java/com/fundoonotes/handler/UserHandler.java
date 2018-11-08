@@ -67,5 +67,9 @@ public class UserHandler {
 						.contentType(MediaType.TEXT_PLAIN)
 						.syncBody(s));
 	}
+	
+	public Mono<ServerResponse> options(ServerRequest serverRequest){
+		return ServerResponse.ok().syncBody("");
+	}
 
 }

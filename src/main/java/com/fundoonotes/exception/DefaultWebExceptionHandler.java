@@ -1,4 +1,4 @@
-package com.fundoonotes.exception;
+/*package com.fundoonotes.exception;
 
 import java.util.Map;
 
@@ -42,9 +42,10 @@ public class DefaultWebExceptionHandler extends DefaultErrorWebExceptionHandler 
 	@Override
 	protected Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
 		Map<String, Object> errorPropertiesMap = getErrorAttributes(request, false);
-		Loggers.getLogger(this.getClass()).info(((String) errorPropertiesMap.get("message")).toUpperCase());
+		Loggers.getLogger(this.getClass()).info(((String) errorPropertiesMap.get("message")));
 		return ServerResponse.status((HttpStatus) errorPropertiesMap.get("status")).contentType(MediaType.TEXT_PLAIN)
 				.body(BodyInserters.fromObject(errorPropertiesMap.get("message")));
 	}
 
 }
+*/

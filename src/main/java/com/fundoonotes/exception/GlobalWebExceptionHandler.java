@@ -1,4 +1,4 @@
-/*package com.fundoonotes.exception;
+package com.fundoonotes.exception;
 
 import java.util.Map;
 
@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,18 +24,18 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 
 @Component
-@Order(-2) // to give it a higher priority than the DefaultErrorWebExceptionHandler which
+@Order(Ordered.HIGHEST_PRECEDENCE) // to give it a higher priority than the DefaultErrorWebExceptionHandler which
 			// is registered at @Order(-1)
 public class GlobalWebExceptionHandler extends AbstractErrorWebExceptionHandler {
 	
 	Logger logger = Loggers.getLogger(GlobalWebExceptionHandler.class);
 
-	*//**
+	/**
 	 * @param globalErrorAttributes to get the custom error response we set
 	 * @param applicationContext
 	 * @param serverCodecConfigurer to configure HTTP message reader and writer
 	 *                              options relevant on the server side
-	 *//*
+	 */
 	public GlobalWebExceptionHandler(GlobalErrorAttributes globalErrorAttributes,
 			ServerCodecConfigurer serverCodecConfigurer, ApplicationContext applicationContext) {
 		super(globalErrorAttributes, new ResourceProperties(), applicationContext);
@@ -55,4 +56,3 @@ public class GlobalWebExceptionHandler extends AbstractErrorWebExceptionHandler 
 	}
 
 }
-*/

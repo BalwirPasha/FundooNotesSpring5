@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.fundoonotes.model.User;
+import com.fundoonotes.model.MyMail;
 import com.fundoonotes.utility.JWToken;
 import com.fundoonotes.utility.MailSender;
 
@@ -30,8 +30,8 @@ public class ApplicationConfig {
 	}
 	
 	@Bean
-	public TopicProcessor<User> userRegistration() {
-		return TopicProcessor.<User>create();
+	public TopicProcessor<MyMail> userRegistration() {
+		return TopicProcessor.<MyMail>create();
 	}
 	
 	@Bean
